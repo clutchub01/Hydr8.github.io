@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Water Project - Survey</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translate(-50%, -100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translate(-50%, 0);
+                opacity: 1;
+            }
+        }
+
+        .toast-enter {
+            animation: slideDown 0.3s ease-out forwards;
+        }
+
+        .option-selected {
+            border-color: #3b82f6 !important;
+            background-color: #eff6ff !important;
+        }
+
+        .radio-selected {
+            border-color: #3b82f6 !important;
+        }
+
+        .radio-dot-selected {
+            background-color: #3b82f6 !important;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 text-gray-900 min-h-screen selection:bg-blue-200 pb-20">
+
+    <!-- Toast Notification -->
+    <div id="toast"
+        class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full shadow-lg z-50 flex items-center gap-2 hidden transition-all">
+        <i data-lucide="check-circle" class="text-green-400 w-5 h-5"></i>
+        <span id="toast-msg" class="font-medium text-sm"></span>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+            <div class="flex items-center gap-2 text-blue-600 font-bold">
+                <i data-lucide="droplet"></i>
+                <span>Hydr8 Research</span>
+            </div>
+            <div id="nav-live-indicator"
+                class="hidden items-center gap-2 text-sm text-green-600 font-medium bg-green-50 px-3 py-1 rounded-full">
+                <span class="relative flex h-2 w-2">
+                    <span
+                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                </span>
+                Live Tracking
+            </div>
+        </div>
+    </nav>
+
+    <main class="w-full">
+
+        <!-- SURVEY VIEW -->
+        <div id="view-survey" class="max-w-2xl mx-auto px-4 py-8 block">
+
+            <!-- Header -->
+            <div class="text-center mb-10">
+                <div
+                    class="bg-blue-100 text-blue-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+                    <i data-lucide="droplet" class="w-8 h-8"></i>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Campus Water Project</h1>
+                <p class="text-gray-500">
+                    Help us bring a better, cheaper cold water solution to campus. Takes less than 2 minutes.
+                </p>
+            </div>
+
+            <!-- Form -->
+            <form id="survey-form" class="space-y-8">
+                <div id="questions-container" class="space-y-8"></div>
+
+                <button type="submit"
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-200 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+                    Submit Responses
+                    <i data-lucide="chevron-right"></i>
+                </button>
+            </form>
+
+            <!-- Share Section -->
+            <div class="mt-12 pt-8 border-t border-gray-200">
+                <div class="bg-indigo-50 rounded-2xl p-6 text-center">
+                    <h4 class="font-semibold text-indigo-900 mb-2">Help Us Reach 100 Responses</h4>
+                    <p class="text-indigo-700 text-sm mb-4">
+                        Copy the survey to send via WhatsApp or to print for offline data collection.
+                    </p>
+
+                    <button id="btn-copy"
+                        class="bg-white text-indigo-600 hover:bg-indigo-100 font-medium py-2 px-6 rounded-lg border border-indigo-200 transition-colors inline-flex items-center gap-2 shadow-sm">
+                        <i data-lucide="copy" class="w-4 h-4"></i>
+                        Copy Survey Link
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SUCCESS VIEW (NOW OUTSIDE SURVEY VIEW) -->
+        <div id="view-success" class="max-w-2xl mx-auto px-4 py-16 hidden text-center">
+
+            <div
+                class="bg-green-100 text-green-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="check-circle" class="w-8 h-8"></i>
+            </div>
+
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Thank You!</h1>
+            <p class="text-gray-500 mb-8">
+                Your response has been submitted successfully.
+            </p>
+
+            <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-4">
+
+                <p class="text-sm text-gray-600">
+                    Help us reach 100 responses by sharing this survey:
+                </p>
+
+                <button id="btn-share-whatsapp"
+                    class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2">
+                    <i data-lucide="message-circle"></i>
+                    Share on WhatsApp
+                </button>
+
+                <button id="btn-copy-success"
+                    class="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-3 rounded-xl flex items-center justify-center gap-2">
+                    <i data-lucide="copy"></i>
+                    Copy Link
+                </button>
+
+
+            </div>
+        </div>
+
+    </main>
+    <script>
+
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import {
+            getFirestore,
+            collection,
+            addDoc,
+            onSnapshot
+        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDhTAWDhjbrsgvKVL6YVmpqA34y5tBg58k",
+            authDomain: "water-survey-9efbe.firebaseapp.com",
+            projectId: "water-survey-9efbe",
+            storageBucket: "water-survey-9efbe.firebasestorage.app",
+            messagingSenderId: "356302132716",
+            appId: "1:356302132716:web:4a0a4bdb8b03b956d39cc9",
+            measurementId: "G-J1TDQZZJ5K"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const analytics = getAnalytics(app);
+
+        window.firebaseDB = db;
+        window.firebaseAddDoc = addDoc;
+        window.firebaseCollection = collection;
+        window.firebaseOnSnapshot = onSnapshot;
+
+        // Data Schema
+        const QUESTIONS = [
+            { id: 'q1', text: 'How often do you buy water at school?', options: ['Every day', '3–4 times a week', '1–2 times a week', 'Rarely or never'] },
+            { id: 'q2', text: 'Since sachet water was banned, what have you been doing for water?', options: ['Buying bottled water (₦250–₦300)', 'Bringing water from home', 'Going without / reducing intake', 'Sharing with friends'] },
+            { id: 'q3', text: 'How much are you willing to pay for 50cl of cold, clean water at school?', options: ['₦50 (same as old sachet)', '₦80', '₦100', '₦150 or more'] },
+            { id: 'q4', text: 'A vending machine sells cold water in disposable cups — you pay with your phone. Would you use it?', options: ['Yes, definitely', 'Probably yes', 'Not sure', 'Probably not / No'] },
+            { id: 'q5', text: 'What would stop you from using it? (pick your biggest concern)', options: ['Paying online feels inconvenient', 'I don\'t trust the water quality', 'I\'d rather bring water from home', 'No concern — I\'d use it'] },
+            { id: 'q6', text: 'Which payment method would you prefer?', options: ['Transfer / bank app', 'USSD code', 'QR code scan', 'Pre-loaded school wallet / card'] },
+            { id: 'q7', text: 'How many cups of water do you typically drink during a full school day?', options: ['1 cup', '2–3 cups', '4–5 cups', '6 or more cups'] },
+            { id: 'q8', text: 'Would you tell your friends about the machine if you liked it?', options: ['Yes, immediately', 'Probably yes', 'Maybe', 'No'] }
+        ];
+
+        const ADMIN_PIN = '1234';
+        const TARGET_RESPONSES = 100;
+        const CHART_COLORS = ['#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe'];
+
+        // State Management
+        let formData = {};
+        let responses = [];
+        let chartInstances = {};
+
+        // DOM Elements
+        const views = {
+            survey: document.getElementById('view-survey'),
+            success: document.getElementById('view-success')
+        };
+        const toastEl = document.getElementById('toast');
+        const toastMsg = document.getElementById('toast-msg');
+
+        // Helpers
+        function showToast(msg) {
+            toastMsg.textContent = msg;
+            toastEl.classList.remove('hidden');
+            toastEl.classList.add('toast-enter', 'flex');
+            setTimeout(() => {
+                toastEl.classList.add('hidden');
+                toastEl.classList.remove('toast-enter', 'flex');
+            }, 3000);
+        }
+
+        function switchView(viewName) {
+            Object.values(views).forEach(el => el.classList.add('hidden'));
+            views[viewName].classList.remove('hidden');
+
+            // Toggle live tracking indicator in nav
+            const navLive = document.getElementById('nav-live-indicator');
+            if (viewName === 'dashboard') {
+                navLive.classList.remove('hidden');
+                navLive.classList.add('flex');
+                renderDashboard();
+            } else {
+                navLive.classList.add('hidden');
+                navLive.classList.remove('flex');
+            }
+            window.scrollTo(0, 0);
+        }
+
+        // Initialize Survey Form
+        function renderSurveyForm() {
+            const container = document.getElementById('questions-container');
+            container.innerHTML = '';
+
+            QUESTIONS.forEach((q, i) => {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-6 rounded-2xl shadow-sm border border-gray-100';
+
+                let optionsHtml = q.options.map((opt, j) => `
+                    <label class="block relative p-4 rounded-xl border-2 border-gray-100 cursor-pointer transition-all duration-200 hover:border-blue-200 hover:bg-gray-50" 
+                           onclick="selectOption('${q.id}', '${opt.replace(/'/g, "\\'")}', this)">
+                        <div class="flex items-center">
+                            <div class="radio-circle w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center mr-3">
+                                <div class="radio-dot w-2.5 h-2.5 rounded-full bg-transparent"></div>
+                            </div>
+                            <span class="font-medium text-gray-700">${opt}</span>
+                        </div>
+                    </label>
+                `).join('');
+
+                card.innerHTML = `
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                        <span class="text-blue-500 mr-2">${i + 1}.</span>${q.text}
+                    </h3>
+                    <div class="space-y-3" id="options-${q.id}">
+                        ${optionsHtml}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Handle Selection
+        window.selectOption = function (qId, option, labelElement) {
+            formData[qId] = option;
+
+            // Reset styles in this group
+            const group = document.getElementById(`options-${qId}`);
+            const labels = group.querySelectorAll('label');
+            labels.forEach(lbl => {
+                lbl.classList.remove('option-selected');
+                lbl.querySelector('.radio-circle').classList.remove('radio-selected');
+                lbl.querySelector('.radio-dot').classList.remove('radio-dot-selected');
+                lbl.querySelector('span.font-medium').classList.remove('text-blue-700');
+            });
+
+            // Apply active styles
+            labelElement.classList.add('option-selected');
+            labelElement.querySelector('.radio-circle').classList.add('radio-selected');
+            labelElement.querySelector('.radio-dot').classList.add('radio-dot-selected');
+            labelElement.querySelector('span.font-medium').classList.add('text-blue-700');
+        };
+
+        // Handle Survey Submit
+        document.getElementById('survey-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (Object.keys(formData).length < QUESTIONS.length) {
+                showToast("Please answer all questions before submitting.");
+                return;
+            }
+
+            const newResponse = { ...formData, timestamp: new Date().toISOString() };
+            await firebaseAddDoc(
+                firebaseCollection(window.firebaseDB, "responses"),
+                newResponse
+            );
+            formData = {};
+            renderSurveyForm();
+
+            showToast("Survey submitted successfully!");
+
+            // GO TO SUCCESS PAGE
+            switchView('success');
+        });
+
+        function getShareText() {
+            return `Hi! Please help us by filling this short survey 👇
+
+${window.location.href}`;
+        }
+        document.getElementById("btn-copy").addEventListener("click", async () => {
+
+
+            const textToCopy = message + "Survey Link: " + link;
+
+            try {
+                await navigator.clipboard.writeText(textToCopy);
+                showToast("Survey copied to clipboard!");
+            } catch (err) {
+                // Fallback
+                try {
+                    const textArea = document.createElement("textarea");
+                    textArea.value = textToCopy;
+
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand("copy");
+                    textArea.remove();
+
+                    showToast("Survey copied to clipboard!");
+                } catch (fallbackErr) {
+                    console.error(fallbackErr);
+                    alert("Failed to copy survey");
+                }
+            }
+
+            // Optional UI feedback
+            const button = document.getElementById("btn-copy");
+            const originalText = button.innerHTML;
+
+            button.innerHTML = `
+        <i data-lucide="check" class="w-4 h-4"></i>
+        Copied!
+    `;
+
+            lucide.createIcons();
+
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                lucide.createIcons();
+            }, 2000);
+        });
+
+
+
+        document.getElementById("btn-share-whatsapp").addEventListener("click", () => {
+            const url = `https://wa.me/?text=${encodeURIComponent(getShareText())}`;
+            window.open(url, "_blank");
+
+        });
+
+        document.getElementById("btn-copy-success").addEventListener("click", async () => {
+            try {
+                await navigator.clipboard.writeText(getShareText());
+                showToast("Link copied!");
+            } catch (err) {
+                const ta = document.createElement("textarea");
+                ta.value = getShareText();
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand("copy");
+                ta.remove();
+                showToast("Link copied!");
+            }
+        });
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', () => {
+            renderSurveyForm();
+            lucide.createIcons();
+        });
+
+    </script>
+</body>
+
+</html>
