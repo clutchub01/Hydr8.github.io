@@ -328,7 +328,7 @@ ${window.location.href}`;
         document.getElementById("btn-copy").addEventListener("click", async () => {
 
 
-            const textToCopy = message + "Survey Link: " + link;
+            const textToCopy = getShareText();
 
             try {
                 await navigator.clipboard.writeText(textToCopy);
