@@ -104,12 +104,17 @@
                     <p class="text-gray-500 mt-1">Water Vending Machine Validation Project</p>
                 </div>
                 <div class="flex gap-3">
-                    <a href="index.html"
-                        class="px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors text-sm flex items-center gap-2 shadow-sm">
-                        <i data-lucide="arrow-left" class="w-4 h-4"></i> Exit Admin
-                    </a>
-                </div>
-            </div>
+    <button id="export-csv-btn"
+        class="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors text-sm flex items-center gap-2 shadow-sm">
+        <i data-lucide="download" class="w-4 h-4"></i>
+        Export CSV
+    </button>
+
+    <a href="index.html"
+        class="px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors text-sm flex items-center gap-2 shadow-sm">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i> Exit Admin
+    </a>
+</div>            </div>
 
             <!-- Goal Progress -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
@@ -370,6 +375,55 @@
 
             lucide.createIcons();
         }
+
+    function exportResponsesToCSV() {
+
+    if (responses.length === 0) {
+        showToast("No responses to export");
+        return;
+    }
+
+    // CSV headers
+    const headers = QUESTIONS.map(q => q.text);
+
+    // Convert responses
+    const rows = responses.map(response => {
+        return QUESTIONS.map(q => {
+            const answer = response[q.id] || '';
+
+            // Escape commas and quotes
+            return `"${String(answer).replace(/"/g, '""')}"`;
+        }).join(',');
+    });
+
+    // Combine CSV
+    const csvContent = [
+        headers.map(h => `"${h}"`).join(','),
+        ...rows
+    ].join('\n');
+
+    // Create file
+    const blob = new Blob([csvContent], {
+        type: 'text/csv;charset=utf-8;'
+    });
+
+    const url = URL.createObjectURL(blob);
+
+    // Download link
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `water-survey-responses.csv`;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
+
+    showToast("CSV exported successfully");
+}
+    document.getElementById('export-csv-btn')
+    .addEventListener('click', exportResponsesToCSV);
 
 
         document.addEventListener('DOMContentLoaded', () => {
