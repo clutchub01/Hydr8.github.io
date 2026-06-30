@@ -1,402 +1,349 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Campus Water Project - Survey</title>
+<meta charset="UTF-8">
+<title>Founder Role Alignment Assessment: CEO vs CTO</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --card: #171a21;
+    --border: #2a2e38;
+    --accent-a: #4f8cff;
+    --accent-b: #ff7a4f;
+    --text: #e8e9ec;
+    --text-dim: #9aa0ab;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 24px 16px 80px;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  h1 { font-size: 1.5rem; margin-bottom: 4px; }
+  .sub { color: var(--text-dim); margin-bottom: 24px; font-size: 0.95rem; }
+  .progress-bar {
+    position: sticky; top: 0; background: var(--bg);
+    padding: 10px 0; z-index: 10;
+  }
+  .progress-track {
+    height: 8px; background: var(--border); border-radius: 4px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; background: linear-gradient(90deg, var(--accent-a), var(--accent-b));
+    width: 0%; transition: width 0.3s ease;
+  }
+  .progress-label { font-size: 0.8rem; color: var(--text-dim); margin-top: 6px; }
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+  .section-title {
+    margin-top: 32px; margin-bottom: 12px; font-size: 1.05rem;
+    color: var(--accent-a); border-bottom: 1px solid var(--border); padding-bottom: 6px;
+  }
+  .q-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px; margin-bottom: 14px;
+  }
+  .q-text { font-weight: 600; margin-bottom: 12px; font-size: 0.95rem; line-height: 1.4; }
+  .opt {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 12px; border-radius: 8px; margin-bottom: 8px;
+    border: 1px solid var(--border); cursor: pointer; transition: all 0.15s;
+    font-size: 0.9rem; line-height: 1.4;
+  }
+  .opt:hover { border-color: var(--accent-a); }
+  .opt.selected-a { border-color: var(--accent-a); background: rgba(79,140,255,0.12); }
+  .opt.selected-b { border-color: var(--accent-b); background: rgba(255,122,79,0.12); }
+  .opt input { margin-top: 3px; flex-shrink: 0; }
+  .tag {
+    display: inline-block; font-size: 0.7rem; font-weight: 700;
+    padding: 2px 6px; border-radius: 4px; margin-right: 8px; flex-shrink: 0;
+  }
+  .tag-a { background: var(--accent-a); color: white; }
+  .tag-b { background: var(--accent-b); color: white; }
 
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
+  .submit-bar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: linear-gradient(180deg, transparent, var(--bg) 30%);
+    padding: 20px 16px 24px; display: flex; justify-content: center;
+  }
+  button {
+    background: linear-gradient(90deg, var(--accent-a), var(--accent-b));
+    color: white; border: none; padding: 14px 28px; border-radius: 30px;
+    font-size: 1rem; font-weight: 600; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  button.secondary {
+    background: var(--card); border: 1px solid var(--border); margin-left: 10px;
+  }
 
-        .hidden {
-            display: none !important;
-        }
+  .results { display: none; }
+  .results.active { display: block; }
+  .assessment.hidden { display: none; }
 
-        @keyframes slideDown {
-            from {
-                transform: translate(-50%, -100%);
-                opacity: 0;
-            }
+  .score-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    padding: 24px; text-align: center; margin-bottom: 20px;
+  }
+  .score-big { font-size: 2.4rem; font-weight: 800; margin: 8px 0; }
+  .verdict { font-size: 1.1rem; font-weight: 600; margin-bottom: 4px; }
+  .bar-outer {
+    height: 22px; border-radius: 11px; background: var(--border);
+    overflow: hidden; display: flex; margin: 18px 0 6px;
+  }
+  .bar-a { background: var(--accent-a); height: 100%; }
+  .bar-b { background: var(--accent-b); height: 100%; }
+  .bar-labels { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-dim); }
 
-            to {
-                transform: translate(-50%, 0);
-                opacity: 1;
-            }
-        }
+  .section-breakdown {
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px; margin-bottom: 12px;
+  }
+  .sb-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 0.88rem; }
+  .sb-mini-bar { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; margin: 0 10px; display:flex; }
 
-        .toast-enter {
-            animation: slideDown 0.3s ease-out forwards;
-        }
-
-        .option-selected {
-            border-color: #3b82f6 !important;
-            background-color: #eff6ff !important;
-        }
-
-        .radio-selected {
-            border-color: #3b82f6 !important;
-        }
-
-        .radio-dot-selected {
-            background-color: #3b82f6 !important;
-        }
-    </style>
+  .name-input {
+    width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--card); color: var(--text); font-size: 0.95rem; margin-bottom: 20px;
+  }
+  .reset-note { text-align: center; color: var(--text-dim); font-size: 0.8rem; margin-top: 30px; }
+</style>
 </head>
+<body>
+<div class="wrap">
 
-<body class="bg-gray-50 text-gray-900 min-h-screen selection:bg-blue-200 pb-20">
+  <div id="assessmentView" class="assessment">
+    <h1>Founder Role Alignment Assessment</h1>
+    <div class="sub">CEO vs. CTO — 30 questions. Answer honestly based on instinct, not what sounds impressive.</div>
 
-    <!-- Toast Notification -->
-    <div id="toast"
-        class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full shadow-lg z-50 flex items-center gap-2 hidden transition-all">
-        <i data-lucide="check-circle" class="text-green-400 w-5 h-5"></i>
-        <span id="toast-msg" class="font-medium text-sm"></span>
+    <input class="name-input" id="takerName" placeholder="Your name (so you can compare results with your co-founder)" />
+
+    <div class="progress-bar">
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-label" id="progressLabel">0 / 30 answered</div>
     </div>
 
-    <!-- Navigation -->
-    <nav class="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
-        <div class="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-            <div class="flex items-center gap-2 text-blue-600 font-bold">
-                <i data-lucide="droplet"></i>
-                <span>Hydr8 Research</span>
-            </div>
-            <div id="nav-live-indicator"
-                class="hidden items-center gap-2 text-sm text-green-600 font-medium bg-green-50 px-3 py-1 rounded-full">
-                <span class="relative flex h-2 w-2">
-                    <span
-                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                </span>
-                Live Tracking
-            </div>
+    <div id="questionsContainer"></div>
+
+    <div class="submit-bar">
+      <button id="submitBtn" disabled>See My Results</button>
+    </div>
+  </div>
+
+  <div id="resultsView" class="results">
+    <div class="score-card">
+      <div class="sub" id="resultName"></div>
+      <div class="verdict" id="verdictText"></div>
+      <div class="score-big" id="scoreBig"></div>
+      <div class="bar-outer">
+        <div class="bar-a" id="barA"></div>
+        <div class="bar-b" id="barB"></div>
+      </div>
+      <div class="bar-labels">
+        <span id="labelA">CEO lean</span>
+        <span id="labelB">CTO lean</span>
+      </div>
+    </div>
+
+    <h2 class="section-title" style="margin-top:0">Section Breakdown</h2>
+    <div id="sectionBreakdown"></div>
+
+    <div class="submit-bar" style="position:static; padding:20px 0;">
+      <button id="retakeBtn">Retake Assessment</button>
+      <button class="secondary" id="exportBtn">Export Results as JSON</button>
+    </div>
+  </div>
+
+  <div class="reset-note">Have your co-founder take it separately, then compare both result summaries side by side.</div>
+</div>
+
+<script>
+const DATA = {
+  "sections": [
+    {"section_title":"Vision, Strategy, & Fundraising","questions":[
+      {"id":1,"question":"When outlining the next 12 months for the company, you are primarily focused on:","options":{"A":"Securing funding, forming partnerships, and defining the market strategy.","B":"Selecting the right tech stack, mapping out the product architecture, and scaling infrastructure."}},
+      {"id":2,"question":"We have an upcoming meeting with a major potential investor. Your instinct is to:","options":{"A":"Refine the pitch deck, perfect the financial projections, and prepare the core narrative.","B":"Polish the prototype, ensure the demo runs flawlessly, and prepare to defend the system's architecture."}},
+      {"id":3,"question":"When looking at a competitor's platform, you first notice:","options":{"A":"Their pricing model, target audience, and marketing positioning.","B":"Their UI/UX, feature set, load times, and underlying technology."}},
+      {"id":4,"question":"How do you define a successful product launch?","options":{"A":"Hitting user acquisition targets and securing early revenue.","B":"Achieving zero downtime, a bug-free release, and a stable deployment."}},
+      {"id":5,"question":"If the company pivots to a completely new industry, your main concern is:","options":{"A":"How to rebrand, sell the new vision, and retain current investors.","B":"How much of the existing codebase and hardware design can be salvaged or refactored."}},
+      {"id":6,"question":"You are given $50,000 in seed money. Where do you want to allocate the majority of it?","options":{"A":"Sales, marketing, legal compliance, and customer acquisition.","B":"R&D, advanced components, cloud hosting, and hiring developers."}}
+    ]},
+    {"section_title":"Engineering, Hardware, & Software","questions":[
+      {"id":7,"question":"If our system requires integrating complex hardware (like sensors or mechatronics) with a mobile app interface, you are more energized by:","options":{"A":"Calculating the unit economics, sourcing cheaper components, and finding buyers.","B":"Writing the firmware, wiring the microcontrollers, and building the API to connect the app to the hardware."}},
+      {"id":8,"question":"When building out an EdTech or gamified platform, your priority is:","options":{"A":"Partnering with schools, running workshops, and testing market fit.","B":"Designing the AI algorithms, setting up the database, and writing the code for the flashcards and timers."}},
+      {"id":9,"question":"We need to build a secure membership and verification portal. You prefer to:","options":{"A":"Define the user flow, manage client expectations, and plan the rollout.","B":"Set up the authentication protocols, build the admin dashboard, and write the backend logic."}},
+      {"id":10,"question":"Your approach to technical debt (rushed code or temporary hardware fixes) is:","options":{"A":"It is an acceptable trade-off if it means getting the product to market faster.","B":"It is a serious risk that needs to be refactored and cleaned up as soon as possible."}},
+      {"id":11,"question":"When evaluating a new technology framework (e.g., React vs. Flutter), you decide based on:","options":{"A":"How quickly we can ship the product and how easy it is to hire developers for it.","B":"The performance benchmarks, community support, and long-term scalability of the codebase."}},
+      {"id":12,"question":"A script you wrote to simulate a complex system isn't running efficiently. You:","options":{"A":"Ask someone else to optimize it so you can get back to business planning.","B":"Spend the weekend debugging, optimizing loops, and reducing computational overhead."}}
+    ]},
+    {"section_title":"Crisis Management & Operations","questions":[
+      {"id":13,"question":"A critical piece of hardware malfunctions in the field for a key client. You:","options":{"A":"Call the client immediately to manage the fallout and protect the brand's reputation.","B":"Grab your tools, pull the system logs, and diagnose the mechanical or software failure on-site."}},
+      {"id":14,"question":"The development timeline is running a month behind schedule. Your reaction is to:","options":{"A":"Adjust the marketing roadmap and negotiate new deadlines with stakeholders.","B":"Cut non-essential features, reorganize the sprint, and jump in to write code or assemble parts."}},
+      {"id":15,"question":"A major security flaw is found in the application. Your first move is:","options":{"A":"Drafting a transparent PR statement and notifying affected users.","B":"Taking the servers offline, patching the vulnerability, and deploying the hotfix."}},
+      {"id":16,"question":"When users complain about a feature being 'too confusing,' you:","options":{"A":"Conduct user interviews to understand their pain points and rethink the product's value proposition.","B":"Review the UI/UX flow, check the analytics, and push an update to streamline the interface."}},
+      {"id":17,"question":"We have limited resources and must choose between two priorities. You choose:","options":{"A":"Expanding to a new campus or city to increase our user base.","B":"Upgrading our internal servers and standardizing our engineering tools."}},
+      {"id":18,"question":"A potential partner wants a feature we don't currently have. You:","options":{"A":"Say 'yes' to secure the deal and figure out how to build it later.","B":"Say 'let me check the architecture' to ensure it's technically feasible before committing."}}
+    ]},
+    {"section_title":"Team, Culture, & Leadership","questions":[
+      {"id":19,"question":"When hiring your first five employees, you are most focused on finding:","options":{"A":"Hustlers, sales leads, and people who can operate in ambiguity.","B":"Senior engineers, CAD designers, and meticulous problem solvers."}},
+      {"id":20,"question":"During a team meeting, you are the person who:","options":{"A":"Sets the overarching goals, motivates the team, and clarifies the mission.","B":"Breaks down the goals into actionable technical sprints and assigns engineering tasks."}},
+      {"id":21,"question":"Your ideal working environment is:","options":{"A":"Taking meetings, networking at events, and pitching on stage.","B":"Deep work, a quiet room, multiple monitors, and building out systems."}},
+      {"id":22,"question":"When resolving a disagreement between the two of you, you rely on:","options":{"A":"Market data, customer feedback, and business logic.","B":"Technical constraints, performance metrics, and engineering logic."}},
+      {"id":23,"question":"How do you view community initiatives and grassroots tech movements?","options":{"A":"As a powerful way to build brand awareness, create a pipeline of talent, and establish thought leadership.","B":"As a great place to mentor young developers and share open-source code and technical knowledge."}},
+      {"id":24,"question":"When reading a book or taking a course, you lean toward:","options":{"A":"Biographies of founders, business strategy, or behavioral economics.","B":"Documentation for a new programming language, advanced mechanics, or system design."}}
+    ]},
+    {"section_title":"Daily Execution & Long-Term Focus","questions":[
+      {"id":25,"question":"If you have a free afternoon with no obligations, you are most likely to:","options":{"A":"Brainstorm new revenue streams or read up on industry trends.","B":"Tinker with a side project, learn a new framework, or review a mechanical design."}},
+      {"id":26,"question":"What keeps you awake at night regarding the startup?","options":{"A":"Running out of cash, losing momentum, or a competitor beating us to market.","B":"The database crashing, a hardware integration failing, or scaling bottlenecks."}},
+      {"id":27,"question":"Your primary metric for personal success in the company is:","options":{"A":"The valuation of the company and our Monthly Recurring Revenue (MRR).","B":"The daily active users, system uptime, and the quality of our product suite."}},
+      {"id":28,"question":"When looking at a physical prototype (like a modified vending machine), you care most about:","options":{"A":"The branding, the placement locations, and the user adoption rate.","B":"The thermodynamic efficiency, the IoT sensor connectivity, and the durability of the parts."}},
+      {"id":29,"question":"You are invited to speak at a conference. You want to talk about:","options":{"A":"The future of indigenous African innovation and how to build a scalable business.","B":"The technical challenges of full-stack development and hardware integration in emerging markets."}},
+      {"id":30,"question":"Ultimately, you believe the company will succeed because of:","options":{"A":"Unbeatable sales, strategic positioning, and understanding what people will pay for.","B":"Superior technology, flawless execution, and building an objectively better product."}}
+    ]}
+  ]
+};
+
+const answers = {};
+const TOTAL = 30;
+
+function buildQuestions() {
+  const container = document.getElementById('questionsContainer');
+  DATA.sections.forEach(sec => {
+    const h = document.createElement('div');
+    h.className = 'section-title';
+    h.textContent = sec.section_title;
+    container.appendChild(h);
+
+    sec.questions.forEach(q => {
+      const card = document.createElement('div');
+      card.className = 'q-card';
+      card.id = 'qcard-' + q.id;
+
+      const qt = document.createElement('div');
+      qt.className = 'q-text';
+      qt.textContent = q.id + '. ' + q.question;
+      card.appendChild(qt);
+
+      ['A','B'].forEach(letter => {
+        const opt = document.createElement('label');
+        opt.className = 'opt';
+        opt.id = 'opt-' + q.id + '-' + letter;
+        opt.innerHTML = `<span class="tag tag-${letter.toLowerCase()}">${letter}</span><span>${q.options[letter]}</span>
+          <input type="radio" name="q${q.id}" value="${letter}" style="display:none">`;
+        opt.addEventListener('click', () => selectAnswer(q.id, letter));
+        card.appendChild(opt);
+      });
+
+      container.appendChild(card);
+    });
+  });
+}
+
+function selectAnswer(qid, letter) {
+  answers[qid] = letter;
+  const cardEl = document.getElementById('qcard-' + qid);
+  ['A','B'].forEach(l => {
+    document.getElementById('opt-' + qid + '-' + l).classList.remove('selected-a','selected-b');
+  });
+  document.getElementById('opt-' + qid + '-' + letter).classList.add('selected-' + letter.toLowerCase());
+  updateProgress();
+}
+
+function updateProgress() {
+  const count = Object.keys(answers).length;
+  document.getElementById('progressFill').style.width = (count / TOTAL * 100) + '%';
+  document.getElementById('progressLabel').textContent = count + ' / ' + TOTAL + ' answered';
+  document.getElementById('submitBtn').disabled = count < TOTAL;
+}
+
+function computeResults() {
+  let countA = 0, countB = 0;
+  const sectionScores = [];
+
+  DATA.sections.forEach(sec => {
+    let secA = 0, secB = 0;
+    sec.questions.forEach(q => {
+      if (answers[q.id] === 'A') { countA++; secA++; }
+      else if (answers[q.id] === 'B') { countB++; secB++; }
+    });
+    sectionScores.push({ title: sec.section_title, a: secA, b: secB, total: sec.questions.length });
+  });
+
+  return { countA, countB, sectionScores };
+}
+
+function verdictFor(countA, countB) {
+  const diff = countA - countB;
+  if (Math.abs(diff) <= 2) return "Balanced — strong dual-capability founder, lean into context-dependent role split.";
+  if (diff > 2) return countA >= 24 ? "Strong CEO alignment — natural external/business operator." : "Leans CEO — growth, strategy, and external-facing instincts dominate.";
+  return countB >= 24 ? "Strong CTO alignment — natural technical/internal builder." : "Leans CTO — engineering and product execution instincts dominate.";
+}
+
+function showResults() {
+  const { countA, countB, sectionScores } = computeResults();
+  const name = document.getElementById('takerName').value.trim() || "You";
+
+  document.getElementById('assessmentView').classList.add('hidden');
+  document.getElementById('resultsView').classList.add('active');
+
+  document.getElementById('resultName').textContent = name + "'s Result";
+  document.getElementById('scoreBig').innerHTML = `CEO ${countA} <span style="color:var(--text-dim); font-weight:400;">vs</span> CTO ${countB}`;
+  document.getElementById('verdictText').textContent = verdictFor(countA, countB);
+
+  const pctA = (countA / TOTAL * 100);
+  const pctB = (countB / TOTAL * 100);
+  document.getElementById('barA').style.width = pctA + '%';
+  document.getElementById('barB').style.width = pctB + '%';
+  document.getElementById('labelA').textContent = `CEO lean — ${countA}/30 (${Math.round(pctA)}%)`;
+  document.getElementById('labelB').textContent = `CTO lean — ${countB}/30 (${Math.round(pctB)}%)`;
+
+  const sb = document.getElementById('sectionBreakdown');
+  sb.innerHTML = '';
+  sectionScores.forEach(s => {
+    const row = document.createElement('div');
+    row.className = 'section-breakdown';
+    const pa = (s.a / s.total * 100);
+    const pb = (s.b / s.total * 100);
+    row.innerHTML = `
+      <div style="font-weight:600; margin-bottom:8px; font-size:0.9rem;">${s.title}</div>
+      <div class="sb-row">
+        <span style="color:var(--accent-a)">CEO ${s.a}</span>
+        <div class="sb-mini-bar">
+          <div class="bar-a" style="width:${pa}%"></div>
+          <div class="bar-b" style="width:${pb}%"></div>
         </div>
-    </nav>
+        <span style="color:var(--accent-b)">CTO ${s.b}</span>
+      </div>`;
+    sb.appendChild(row);
+  });
 
-    <main class="w-full">
+  window._lastResult = { name, countA, countB, sectionScores, answers: {...answers}, timestamp: new Date().toISOString() };
+}
 
-        <!-- SURVEY VIEW -->
-        <div id="view-survey" class="max-w-2xl mx-auto px-4 py-8 block">
+document.getElementById('submitBtn').addEventListener('click', showResults);
 
-            <!-- Header -->
-            <div class="text-center mb-10">
-                <div
-                    class="bg-blue-100 text-blue-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
-                    <i data-lucide="droplet" class="w-8 h-8"></i>
-                </div>
-                <h1 class="text-3xl font-bold text-gray-900 mb-2">Campus Water Project</h1>
-                <p class="text-gray-500">
-                    Help us bring a better, cheaper cold water solution to campus. Takes less than 2 minutes.
-                </p>
-            </div>
+document.getElementById('retakeBtn').addEventListener('click', () => {
+  Object.keys(answers).forEach(k => delete answers[k]);
+  document.querySelectorAll('.opt').forEach(o => o.classList.remove('selected-a','selected-b'));
+  updateProgress();
+  document.getElementById('resultsView').classList.remove('active');
+  document.getElementById('assessmentView').classList.remove('hidden');
+  window.scrollTo(0,0);
+});
 
-            <!-- Form -->
-            <form id="survey-form" class="space-y-8">
-                <div id="questions-container" class="space-y-8"></div>
+document.getElementById('exportBtn').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(window._lastResult, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = (window._lastResult.name.replace(/\s+/g,'_') || 'result') + '_founder_assessment.json';
+  a.click();
+  URL.revokeObjectURL(url);
+});
 
-                <button type="submit"
-                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-200 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
-                    Submit Responses
-                    <i data-lucide="chevron-right"></i>
-                </button>
-            </form>
-
-            <!-- Share Section -->
-            <div class="mt-12 pt-8 border-t border-gray-200">
-                <div class="bg-indigo-50 rounded-2xl p-6 text-center">
-                    <h4 class="font-semibold text-indigo-900 mb-2">Help Us Reach 100 Responses</h4>
-                    <p class="text-indigo-700 text-sm mb-4">
-                        Copy the survey to send via WhatsApp or to print for offline data collection.
-                    </p>
-
-                    <button id="btn-copy"
-                        class="bg-white text-indigo-600 hover:bg-indigo-100 font-medium py-2 px-6 rounded-lg border border-indigo-200 transition-colors inline-flex items-center gap-2 shadow-sm">
-                        <i data-lucide="copy" class="w-4 h-4"></i>
-                        Copy Survey Link
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- SUCCESS VIEW (NOW OUTSIDE SURVEY VIEW) -->
-        <div id="view-success" class="max-w-2xl mx-auto px-4 py-16 hidden text-center">
-
-            <div
-                class="bg-green-100 text-green-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i data-lucide="check-circle" class="w-8 h-8"></i>
-            </div>
-
-            <h1 class="text-3xl font-bold text-gray-900 mb-2">Thank You!</h1>
-            <p class="text-gray-500 mb-8">
-                Your response has been submitted successfully.
-            </p>
-
-            <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-4">
-
-                <p class="text-sm text-gray-600">
-                    Help us reach 100 responses by sharing this survey:
-                </p>
-
-                <button id="btn-share-whatsapp"
-                    class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2">
-                    <i data-lucide="message-circle"></i>
-                    Share on WhatsApp
-                </button>
-
-                <button id="btn-copy-success"
-                    class="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-3 rounded-xl flex items-center justify-center gap-2">
-                    <i data-lucide="copy"></i>
-                    Copy Link
-                </button>
-
-
-            </div>
-        </div>
-
-    </main>
-<script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import {
-            getFirestore,
-            collection,
-            addDoc,
-            onSnapshot
-        } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyDhTAWDhjbrsgvKVL6YVmpqA34y5tBg58k",
-            authDomain: "water-survey-9efbe.firebaseapp.com",
-            projectId: "water-survey-9efbe",
-            storageBucket: "water-survey-9efbe.firebasestorage.app",
-            messagingSenderId: "356302132716",
-            appId: "1:356302132716:web:4a0a4bdb8b03b956d39cc9",
-            measurementId: "G-J1TDQZZJ5K"
-        };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        window.firebaseDB = db;
-        window.firebaseAddDoc = addDoc;
-        window.firebaseCollection = collection;
-        window.firebaseOnSnapshot = onSnapshot;
-
-        // Data Schema
-        const QUESTIONS = [
-            { id: 'q1', text: 'How often do you buy water at school?', options: ['Every day', '3–4 times a week', '1–2 times a week', 'Rarely or never'] },
-            { id: 'q2', text: 'Since sachet water was banned, what have you been doing for water?', options: ['Buying bottled water (₦250–₦300)', 'Bringing water from home', 'Going without / reducing intake', 'Sharing with friends'] },
-            { id: 'q3', text: 'How much are you willing to pay for 50cl of cold, clean water at school?', options: ['₦50 (same as old sachet)', '₦80', '₦100', '₦150 or more'] },
-            { id: 'q4', text: 'A vending machine sells cold water in disposable cups — you pay with your phone. Would you use it?', options: ['Yes, definitely', 'Probably yes', 'Not sure', 'Probably not / No'] },
-            { id: 'q5', text: 'What would stop you from using it? (pick your biggest concern)', options: ['Paying online feels inconvenient', 'I don\'t trust the water quality', 'I\'d rather bring water from home', 'No concern — I\'d use it'] },
-            { id: 'q6', text: 'Which payment method would you prefer?', options: ['Transfer / bank app', 'USSD code', 'QR code scan', 'Pre-loaded school wallet / card'] },
-            { id: 'q7', text: 'How many cups of water do you typically drink during a full school day?', options: ['1 cup', '2–3 cups', '4–5 cups', '6 or more cups'] },
-            { id: 'q8', text: 'Would you tell your friends about the machine if you liked it?', options: ['Yes, immediately', 'Probably yes', 'Maybe', 'No'] }
-        ];
-
-        const ADMIN_PIN = '1234';
-        const TARGET_RESPONSES = 100;
-        const CHART_COLORS = ['#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe'];
-
-        // State Management
-        let formData = {};
-        let responses = [];
-        let chartInstances = {};
-
-        // DOM Elements
-        const views = {
-            survey: document.getElementById('view-survey'),
-            success: document.getElementById('view-success')
-        };
-        const toastEl = document.getElementById('toast');
-        const toastMsg = document.getElementById('toast-msg');
-
-        // Helpers
-        function showToast(msg) {
-            toastMsg.textContent = msg;
-            toastEl.classList.remove('hidden');
-            toastEl.classList.add('toast-enter', 'flex');
-            setTimeout(() => {
-                toastEl.classList.add('hidden');
-                toastEl.classList.remove('toast-enter', 'flex');
-            }, 3000);
-        }
-
-        function switchView(viewName) {
-            Object.values(views).forEach(el => el.classList.add('hidden'));
-            views[viewName].classList.remove('hidden');
-
-            // Toggle live tracking indicator in nav
-            const navLive = document.getElementById('nav-live-indicator');
-            if (viewName === 'dashboard') {
-                navLive.classList.remove('hidden');
-                navLive.classList.add('flex');
-                renderDashboard();
-            } else {
-                navLive.classList.add('hidden');
-                navLive.classList.remove('flex');
-            }
-            window.scrollTo(0, 0);
-        }
-
-        // Initialize Survey Form
-        function renderSurveyForm() {
-            const container = document.getElementById('questions-container');
-            container.innerHTML = '';
-
-            QUESTIONS.forEach((q, i) => {
-                const card = document.createElement('div');
-                card.className = 'bg-white p-6 rounded-2xl shadow-sm border border-gray-100';
-
-                let optionsHtml = q.options.map((opt, j) => `
-                    <label class="block relative p-4 rounded-xl border-2 border-gray-100 cursor-pointer transition-all duration-200 hover:border-blue-200 hover:bg-gray-50" 
-                           onclick="selectOption('${q.id}', '${opt.replace(/'/g, "\\'")}', this)">
-                        <div class="flex items-center">
-                            <div class="radio-circle w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center mr-3">
-                                <div class="radio-dot w-2.5 h-2.5 rounded-full bg-transparent"></div>
-                            </div>
-                            <span class="font-medium text-gray-700">${opt}</span>
-                        </div>
-                    </label>
-                `).join('');
-
-                card.innerHTML = `
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">
-                        <span class="text-blue-500 mr-2">${i + 1}.</span>${q.text}
-                    </h3>
-                    <div class="space-y-3" id="options-${q.id}">
-                        ${optionsHtml}
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        // Handle Selection
-        window.selectOption = function (qId, option, labelElement) {
-            formData[qId] = option;
-
-            // Reset styles in this group
-            const group = document.getElementById(`options-${qId}`);
-            const labels = group.querySelectorAll('label');
-            labels.forEach(lbl => {
-                lbl.classList.remove('option-selected');
-                lbl.querySelector('.radio-circle').classList.remove('radio-selected');
-                lbl.querySelector('.radio-dot').classList.remove('radio-dot-selected');
-                lbl.querySelector('span.font-medium').classList.remove('text-blue-700');
-            });
-
-            // Apply active styles
-            labelElement.classList.add('option-selected');
-            labelElement.querySelector('.radio-circle').classList.add('radio-selected');
-            labelElement.querySelector('.radio-dot').classList.add('radio-dot-selected');
-            labelElement.querySelector('span.font-medium').classList.add('text-blue-700');
-        };
-
-        // Handle Survey Submit
-        document.getElementById('survey-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            if (Object.keys(formData).length < QUESTIONS.length) {
-                showToast("Please answer all questions before submitting.");
-                return;
-            }
-
-            const newResponse = { ...formData, timestamp: new Date().toISOString() };
-            await firebaseAddDoc(
-                firebaseCollection(window.firebaseDB, "responses"),
-                newResponse
-            );
-            formData = {};
-            renderSurveyForm();
-
-            showToast("Survey submitted successfully!");
-
-            // GO TO SUCCESS PAGE
-            switchView('success');
-        });
-
-        function getShareText() {
-            return `Hi! Please help us by filling this short survey 👇
-
-${window.location.href}`;
-        }
-        document.getElementById("btn-copy").addEventListener("click", async () => {
-
-
-            const textToCopy = getShareText();
-
-            try {
-                await navigator.clipboard.writeText(textToCopy);
-                showToast("Survey copied to clipboard!");
-            } catch (err) {
-                // Fallback
-                try {
-                    const textArea = document.createElement("textarea");
-                    textArea.value = textToCopy;
-
-                    document.body.appendChild(textArea);
-                    textArea.select();
-                    document.execCommand("copy");
-                    textArea.remove();
-
-                    showToast("Survey copied to clipboard!");
-                } catch (fallbackErr) {
-                    console.error(fallbackErr);
-                    alert("Failed to copy survey");
-                }
-            }
-
-            // Optional UI feedback
-            const button = document.getElementById("btn-copy");
-            const originalText = button.innerHTML;
-
-            button.innerHTML = `
-        <i data-lucide="check" class="w-4 h-4"></i>
-        Copied!
-    `;
-
-            lucide.createIcons();
-
-            setTimeout(() => {
-                button.innerHTML = originalText;
-                lucide.createIcons();
-            }, 2000);
-        });
-
-
-
-        document.getElementById("btn-share-whatsapp").addEventListener("click", () => {
-            const url = `https://wa.me/?text=${encodeURIComponent(getShareText())}`;
-            window.open(url, "_blank");
-
-        });
-
-        document.getElementById("btn-copy-success").addEventListener("click", async () => {
-            try {
-                await navigator.clipboard.writeText(getShareText());
-                showToast("Link copied!");
-            } catch (err) {
-                const ta = document.createElement("textarea");
-                ta.value = getShareText();
-                document.body.appendChild(ta);
-                ta.select();
-                document.execCommand("copy");
-                ta.remove();
-                showToast("Link copied!");
-            }
-        });
-        // Initialize App
-        document.addEventListener('DOMContentLoaded', () => {
-            renderSurveyForm();
-            lucide.createIcons();
-        });
-
-    </script>
+buildQuestions();
+updateProgress();
+</script>
 </body>
-
 </html>
